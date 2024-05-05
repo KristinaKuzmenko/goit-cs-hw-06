@@ -11,7 +11,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
 URI_DB = "mongodb://mongodb:27017"
-BASE_DIR = Path(__file__).parent
+BASE_DIR = Path(__file__).parent/"front-init"
 CHUNK_SIZE = 1024
 HTTP_PORT = 3000
 SOCKET_PORT = 5000
@@ -24,15 +24,15 @@ class HttpGetHandler(BaseHTTPRequestHandler):
         router = urlparse(self.path).path
         match router:
             case "/":
-                self.send_html("index.html")
-            case "/message.html":
-                self.send_html("message.html")
+                self.send_html("front-init/index.html")
+            case "front-init/message.html":
+                self.send_html("front-init/message.html")
             case _:
                 file = BASE_DIR.joinpath(router[1:])
                 if file.exists():
                     self.send_static(file)
                 else:
-                    self.send_html("error.html", 404)
+                    self.send_html("front-init/error.html", 404)
 
     def do_POST(self):
         data = self.rfile.read(int(self.headers["Content-Length"]))
