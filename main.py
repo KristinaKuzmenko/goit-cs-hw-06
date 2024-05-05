@@ -12,7 +12,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
 URI_DB = "mongodb://mongodb:27017"
-BASE_DIR = Path(__file__).parent/"front-init"
+BASE_DIR = Path(__file__).parent / "front-init"
 CHUNK_SIZE = 1024
 HTTP_PORT = 3000
 SOCKET_PORT = 5000
@@ -87,7 +87,7 @@ def save_to_db(data):
         document = {"date": datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")}
         document.update(data_dict)
         db.messages.insert_one(document)
-        
+
     except Exception as e:
         logging.error(e)
     finally:
