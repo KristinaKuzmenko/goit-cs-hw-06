@@ -1,3 +1,4 @@
+import json
 import mimetypes
 from pathlib import Path
 import socket
@@ -86,6 +87,7 @@ def save_to_db(data):
         document = {"date": datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")}
         document.update(data_dict)
         db.messages.insert_one(document)
+        
     except Exception as e:
         logging.error(e)
     finally:
