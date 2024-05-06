@@ -1,4 +1,3 @@
-import json
 import mimetypes
 from pathlib import Path
 import socket
@@ -6,7 +5,7 @@ import logging
 from datetime import datetime
 from urllib.parse import urlparse, unquote_plus
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from threading import Thread
+from multiprocessing import Process
 
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -26,7 +25,7 @@ class HttpGetHandler(BaseHTTPRequestHandler):
         match router:
             case "/":
                 self.send_html("front-init/index.html")
-            case "front-init/message.html":
+            case "/message.html":
                 self.send_html("front-init/message.html")
             case _:
                 file = BASE_DIR.joinpath(router[1:])
@@ -69,6 +68,8 @@ def run_http_server():
     try:
         logging.info(f"Server started: http://{HTTP_HOST}:{HTTP_PORT}")
         httpd.serve_forever()
+    except KeyboardInterrupt:
+        logging.info("Server stopped due to a KeyboardInterrupt")
     except Exception as e:
         logging.error(e)
     finally:
@@ -103,6 +104,8 @@ def run_socket_server():
             data, addr = server.recvfrom(CHUNK_SIZE)
             logging.info(f"Received data from {addr}: {data.decode()}")
             save_to_db(data.decode())
+    except KeyboardInterrupt:
+        logging.info("Socket server stopped due to a KeyboardInterrupt")
     except Exception as e:
         logging.error(e)
     finally:
@@ -112,7 +115,23 @@ def run_socket_server():
 
 if __name__ == "__main__":
     logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(threadName)s - %(message)s"
+        level=logging.INFO, format="%(asctime)s - %(process)s - %(message)s"
     )
-    Thread(target=run_http_server, name="http_server").start()
-    Thread(target=run_socket_server, name="socket_server").start()
+
+    http_server = Process(target=run_http_server, name="http_server")
+    socket_server = Process(target=run_socket_server, name="socket_server")
+
+    http_server.start()
+    socket_server.start()
+
+    try:
+        http_server.join()
+        socket_server.join()
+    except KeyboardInterrupt:
+        logging.info("Severs are stopping due to a KeyboardInterrupt")
+    finally:
+        http_server.terminate()
+        socket_server.terminate()
+        http_server.join()
+        socket_server.join()
+        logging.info("Severs stopped")
