@@ -6,7 +6,7 @@ html {
 
 body {
   flex: 1;
-  background-image: linear-gradient(180deg, #f2eded, #fce3e3 100px, #cb9797);
+  background-image: linear-gradient(180deg, #f2eded, #f0dede 100px, #b5a490);
 }
 
 .container {
